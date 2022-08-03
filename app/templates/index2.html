@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<style>
+    body {
+        background: antiquewhite;
+    }
+</style>
+<head>
+    <meta charset="UTF-8">
+    <title>天气预报 </title>
+</head>
+<body>
+<input id="source_name" type="text" placeholder="请输入城市名" />
+<button id="query" onclick="search()">查询</button>
+
+<h1 id="city">{{ data['cityInfo']['city'] }}天气预报</h1>
+<b>温度 </b> <b id="wendu">{{ data['data']['wendu'] }}</b> <br>
+<b>湿度 </b> <b  id="shidu">{{ data['data']['shidu'] }}</b> <br>
+<b>空气质量 </b> <b  id="quality">{{ data['data']['quality'] }}</b> <br>
+<b>PM2.5 </b> <b  id="pm25">{{ data['data']['pm25'] }}</b> <br>
+<b>PM10 </b> <b  id="pm10">{{ data['data']['pm10'] }}</b> <br><br>
+<h2 id="weilai">未来{{ data['data']['forecast'] | length }}天天气预报</h2>
+{% for weather in data['data']['forecast'] %}
+    {% if loop.index <= data['data']['forecast'] | length %}
+        <b>日期 </b>{{ weather['ymd'] }}<br>
+        <b>天气 </b>{{ weather['type'] }}<br>
+        <b>温度 </b>{{ weather['high'] }} {{ weather['low'] }}<br>
+        <b>日出 </b>{{ weather['sunrise'] }}<br>
+        <b>日落 </b>{{ weather['sunset'] }}<br>
+        <b>空气质量 </b>{{ weather['aqi'] }}<br>
+        <b>风向 </b>{{ weather['fx'] }}<br>
+        <b>风力 </b>{{ weather['fl'] }}<br>
+    {% endif %}
+    <br>
+{% endfor %}
+
+</body>
+<script>
+    function search() {
+            var city = document.getElementById("source_name").value
+            if(city === ""){
+                alert("请输入要查询的城市！")
+            }else {
+                send(city)
+            }
+    }
+
+    function send(city) {
+            fetch('/query', {
+            method: 'post',
+            body:JSON.stringify({"query":city}),
+            headers:{
+                'Content-Type': 'application/json'
+            }
+           }).then((data) => data.json()).then((resp) =>{
+            // console.log(resp["cityInfo"]["city"])
+            // console.log(resp["data"]["city"])
+            document.getElementById("city").innerHTML = resp["cityInfo"]["city"] + "天气预报"
+            document.getElementById("wendu").innerHTML = resp["data"]["wendu"]
+            document.getElementById("quality").innerHTML = resp["data"]["quality"]
+            document.getElementById("pm25").innerHTML = resp["data"]["pm25"]
+            document.getElementById("pm10").innerHTML = resp["data"]["pm10"]
+            document.getElementById("weilai").innerHTML = "未来" + resp["data"]["forecast"].length + "天天气预报"
+                
+
+      });
+        }
+</script>
+</html>
